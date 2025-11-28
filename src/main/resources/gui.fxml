@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="it.univr.mokamintminer.GUIController"
+      spacing="15" padding="20">
+
+    <Label text="Mokamint Desktop Miner"
+           style="-fx-font-size: 22px; -fx-font-weight: bold;" />
+
+    <HBox spacing="10">
+        <Label text="Endpoint:"/>
+        <TextField fx:id="endpointField" promptText="es: http://localhost:8033"/>
+    </HBox>
+
+    <Button text="Crea nuovo miner"
+            fx:id="btnCreateMiner"
+            onAction="#onCreateMiner" />
+    <Label fx:id="statusLabel" text="Stato: in attesa..."
+           style="-fx-font-size: 14px;" />
+</VBox>
