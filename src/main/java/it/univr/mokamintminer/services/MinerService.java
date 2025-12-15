@@ -2,13 +2,16 @@ package it.univr.mokamintminer.services;
 
 public class MinerService {
 
-    public void generateKeyPair() {
+    public String generateNewKey() {
         // implementare generazione chiave
-        System.out.println("Generating key...");
+        System.out.println("Generating new key...");
+        return "TEMP_GENERATED_KEY";
     }
 
-    public void createMiner(String endpoint) {
+    public void createPlot(long plotSize, String key) {
         // implementare invio richiesta
-        System.out.println("Creating miner at endpoint: " + endpoint );
+        System.out.println("Creating plot..." );
+        System.out.println("Plot size: " + plotSize);
+        System.out.println("Key: " + key);
     }
 }

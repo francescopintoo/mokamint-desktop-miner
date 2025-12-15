@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
@@ -17,10 +14,12 @@
         <Insets top="24" right="24" bottom="24" left="24"/>
     </padding>
 
+    <!-- TITOLO -->
     <Label text="Mokamint Desktop Miner"
            style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #212121;"
            alignment="CENTER"/>
 
+    <!-- ENDPOINT -->
     <HBox spacing="12">
         <Label text="Endpoint:" style="-fx-font-size: 16px; -fx-text-fill: #212121;"/>
         <TextField fx:id="endpointField"
@@ -28,12 +27,29 @@
                    style="-fx-font-size: 16px; -fx-pref-width: 300px;" />
     </HBox>
 
-    <Button text="Create miner"
-            fx:id="btnCreateMiner"
-            onAction="#onCreateMiner"
+    <!-- PLOT SIZE -->
+    <HBox spacing="12">
+        <Label text="Plot size (MB):" style="-fx-font-size: 16px; -fx-text-fill: #212121;"/>
+        <TextField fx:id="plotSizeField"
+                   promptText="e.g. 1024"
+                   style="-fx-font-size: 16px; -fx-pref-width: 150px;" />
+    </HBox>
+
+    <!-- PLOT KEY -->
+    <HBox spacing="8" >
+        <Label text="Plot key:" style="-fx-font-size: 16px; -fx-text-fill: #212121;"/>
+        <TextField fx:id="plotKeyField"
+                   promptText="plot key"
+                   style="-fx-font-size: 16px; -fx-pref-width: 300px;"/>
+    </HBox>
+
+    <!-- CREATE PLOT -->
+    <Button text="Create plot"
+            onAction="#onCreatePlot"
             style="-fx-background-color: #6200EE; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px;"
             maxWidth="Infinity"/>
 
+    <!-- STATUS -->
     <Label fx:id="statusLabel"
            text="Status: waiting..."
            style="-fx-font-size: 14px; -fx-text-fill: #616161;"

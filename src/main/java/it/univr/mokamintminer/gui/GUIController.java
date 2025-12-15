@@ -11,30 +11,39 @@ public class GUIController {
     private TextField endpointField;
 
     @FXML
+    private TextField plotSizeField;
+
+    @FXML
+    private TextField plotKeyField;
+
+    @FXML
     private Label statusLabel;
 
-    private MinerService minerService = new MinerService();
+    private final MinerService minerService = new MinerService();
 
     @FXML
-    private void onGenerateKey() {
-        statusLabel.setText("Generate key...");
-        // per ora è solo una funzione finta
-        minerService.generateKeyPair();
-        statusLabel.setText("Key generated");
-    }
-
-    @FXML
-    private void onCreateMiner() {
+    private void onCreatePlot() {
         String endpoint = endpointField.getText().trim();
+        String plotSizeText = plotSizeField.getText().trim();
+        String plotKey = plotKeyField.getText().trim();
 
-        if (endpoint.isEmpty()) {
-            statusLabel.setText("Error: please enter an endpoint");
+        if (endpoint.isEmpty() || plotSizeText.isEmpty() || plotKey.isEmpty()) {
+            statusLabel.setText("Status: please fill in all fields");
             return;
         }
 
-        statusLabel.setText("Creating miner...");
-        // anche questa ancora da creare
-        minerService.createMiner(endpoint);
-        statusLabel.setText("Miner created");
+        long plotSize;
+        try {
+            plotSize = Long.parseLong(plotSizeText);
+        } catch (NumberFormatException e) {
+            statusLabel.setText("Status: plot size must be a number");
+            return;
+        }
+        statusLabel.setText("Status: creating plot...");
+
+        // ancora da creare: la logica verrà aggiunta
+        minerService.createPlot(plotSize, plotKey);
+
+        statusLabel.setText("Status: plot created");
     }
 }
