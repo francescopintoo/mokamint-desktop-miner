@@ -22,6 +22,16 @@ public class GUIController {
     private final MinerService minerService = new MinerService();
 
     @FXML
+    private void onGenerateKey() {
+        statusLabel.setText("Status: generating new key...");
+
+        String newKey = minerService.generateNewKeyPair();
+        plotKeyField.setText(newKey);
+
+        statusLabel.setText("Status: new key generated");
+    }
+
+    @FXML
     private void onCreatePlot() {
         String endpoint = endpointField.getText().trim();
         String plotSizeText = plotSizeField.getText().trim();

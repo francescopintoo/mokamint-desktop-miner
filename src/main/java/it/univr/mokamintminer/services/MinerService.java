@@ -1,11 +1,16 @@
 package it.univr.mokamintminer.services;
 
+import java.security.SecureRandom;
+import java.util.Base64;
+
 public class MinerService {
 
-    public String generateNewKey() {
-        // implementare generazione chiave
-        System.out.println("Generating new key...");
-        return "TEMP_GENERATED_KEY";
+    private final SecureRandom random = new SecureRandom();
+
+    public String generateNewKeyPair() {
+        byte[] bytes = new byte[32];
+        random.nextBytes(bytes);
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
     public void createPlot(long plotSize, String key) {

@@ -35,6 +35,12 @@
                    style="-fx-font-size: 16px; -fx-pref-width: 150px;" />
     </HBox>
 
+    <!-- GENERATE KEY BUTTON -->
+    <Button text="Generate new key"
+            onAction="#onGenerateKey"
+            style="-fx-background-color: #03DAC5; -fx-text-fill: black; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px;"
+            maxWidth="Infinity" />
+
     <!-- PLOT KEY -->
     <HBox spacing="8" >
         <Label text="Plot key:" style="-fx-font-size: 16px; -fx-text-fill: #212121;"/>
