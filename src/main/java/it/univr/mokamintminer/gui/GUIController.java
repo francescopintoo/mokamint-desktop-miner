@@ -51,7 +51,6 @@ public class GUIController {
         }
         statusLabel.setText("Status: creating plot...");
 
-        // ancora da creare: la logica verrà aggiunta
         minerService.createPlot(plotSize, plotKey);
 
         statusLabel.setText("Status: plot created");
