@@ -25,7 +25,7 @@ public class MinerService {
      * @param plotSizeMB dimensione del plot in MB
      * @param key chiave del plot
      */
-    public void createPlot(long plotSizeMB, String key) {
+    public String createPlot(long plotSizeMB, String key) {
         System.out.println("Creating plot..." );
         System.out.println("Plot size (MB): " + plotSizeMB);
         System.out.println("Key: " + key);
@@ -48,10 +48,11 @@ public class MinerService {
                 bytesWritten += bytesToWrite;
             }
         } catch (IOException e) {
-            System.out.println("Error: unable to create plot file.");
             e.printStackTrace();
+            return "Error: unable to create plot file";
         }
 
-        System.out.println("Status: plot created at " + file.getAbsolutePath() + " (" + plotSizeMB + " MB)");
+        return "Plot created at " + file.getAbsolutePath() + " (" + plotSizeMB + " MB)";
+
     }
 }

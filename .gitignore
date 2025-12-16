@@ -11,4 +11,4 @@
 
 # Mac / Linux / Windows
 .DS_Store
-Thumbs.db
+Thumbs.db*.bin
