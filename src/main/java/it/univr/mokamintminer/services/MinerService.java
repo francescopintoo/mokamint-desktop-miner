@@ -25,19 +25,19 @@ public class MinerService {
      * @param plotSizeMB dimensione del plot in MB
      * @param key chiave del plot
      */
-    public String createPlot(long plotSizeMB, String key) {
+    public String createPlot(long plotSizeMB, String key, String endpoint) {
         System.out.println("Creating plot..." );
         System.out.println("Plot size (MB): " + plotSizeMB);
-        System.out.println("Key: " + key);
+        System.out.println("Plot Key: " + key);
 
         // File plot simulato
         String fileName = "plot_" + key.substring(0, Math.min(8, key.length())) + ".bin";
-        File file = new File(fileName);
+        File plotFile = new File(fileName);
 
         // Numero di byte totali da scrivere
         long totalBytes = plotSizeMB * 1024 * 1024;
 
-        try (FileOutputStream fos = new FileOutputStream(file)) {
+        try (FileOutputStream fos = new FileOutputStream(plotFile)) {
             byte[] buffer = new byte[1024 * 1024]; // buffer da 1MB
             long bytesWritten = 0;
 
@@ -49,10 +49,24 @@ public class MinerService {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return "Error: unable to create plot file";
+            return "Error while creating plot";
         }
 
-        return "Plot created at " + file.getAbsolutePath() + " (" + plotSizeMB + " MB)";
+        System.out.println("Plot created at " + plotFile.getAbsolutePath());
 
+        // Simulazione
+        System.out.println("Sending plot to node " + endpoint + "...");
+        simulateSend(plotFile, endpoint);
+        System.out.println("Plot successfully sent");
+
+        return "Plot created and sent to node";
+    }
+
+    private void simulateSend(File plotFile, String endpoint) {
+        // simulazione: nessuna rete reale
+        try {
+            Thread.sleep(500); // solo per simulare un'attesa
+        } catch (InterruptedException ignored) {
+        }
     }
 }

@@ -51,7 +51,7 @@ public class GUIController {
         }
         statusLabel.setText("Status: creating plot...");
 
-        String result = minerService.createPlot(plotSize, plotKey);
+        String result = minerService.createPlot(plotSize, plotKey, endpoint);
 
         statusLabel.setText("Status: " + result);
     }
