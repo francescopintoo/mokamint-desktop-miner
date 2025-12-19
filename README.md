@@ -44,7 +44,8 @@ Attualmente il progetto permette di generare una chiave, creare un plot su disco
 >             services/
 >               MinerService.java
 > 
->             core/                                     # Vuoto per ora, logica miner futura
+>             core/                                     # Logica miner 
+>               ReconnectingRemoteMiner.java
 >             util/                                     # Vuoto per ora, utility future
 > 
 >         resources/

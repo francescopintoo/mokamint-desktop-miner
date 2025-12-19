@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+import it.univr.mokamintminer.core.ReconnectingRemoteMiner;
+
 public class MinerService {
 
     private final SecureRandom random = new SecureRandom();
@@ -31,6 +33,7 @@ public class MinerService {
         System.out.println("Plot Key: " + key);
 
         // File plot simulato
+        String safeKey = key.replace("/", "_");
         String fileName = "plot_" + key.substring(0, Math.min(8, key.length())) + ".bin";
         File plotFile = new File(fileName);
 
@@ -59,7 +62,16 @@ public class MinerService {
         simulateSend(plotFile, endpoint);
         System.out.println("Plot successfully sent");
 
-        return "Plot created and sent to node";
+        // Start miner
+        ReconnectingRemoteMiner miner = new ReconnectingRemoteMiner(endpoint, plotFile);
+
+        Thread minerThread = new Thread(miner);
+        minerThread.setDaemon(true);
+        minerThread.start();
+
+        System.out.println("Remote miner started");
+
+        return "Plot created and mining started";
     }
 
     private void simulateSend(File plotFile, String endpoint) {
