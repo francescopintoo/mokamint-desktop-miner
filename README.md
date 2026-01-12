@@ -6,25 +6,26 @@ Progetto desktop JavaFX per la Laurea Triennale in Informatica.
 
 Questo progetto è una versione desktop del miner Mokamint desktop, ispirata all'applicazione Android Mokaminter.
 L'obiettivo è riprodurre la struttura dell'applicazione Androind in ambiente desktop, implementando progressivamente la GUI e la logica di base del miner.
-Attualmente il progetto permette di generare una chiave, creare un plot su disco e simulare l'invio del plot a un nodo Mokamint tramite endpoint. 
+Attualmente il progetto permette di generare un plot su disco, inviarlo (simulato) a un nodo Mokamint tramite endpoint e avviare/arrestare il mining, con gestione corretta dello stato della GUI. 
 
 ## Funzionalità implementate (al momento)
 
 - GUI JavaFX con: 
   - campo per l'inserimento dell'endpoint del nodo Mokamint;
-  - campo per la dimensione del plot (in MB);
-  - campo per la plot key;
-  - pulsante per la generazione di una nuova chiave;
-  - pulsante per la creazione del plot;
-  - label di stato che mostra l'avanzamento delle operazioni.
-- Classe MinerService con: 
-  - generateNewKeyPair(): genera una chiave cassuale utilizzando SecureRandom e la restituisce codificata in Base64;
-  - createPlot(long plotSizeMB, String key, String endpoint):
-    - crea un file .bin sul disco della dimensione specificata; 
-    - usa la chiave per identificare il nome del plot; 
+  - campo per il nome/directory del plot '.bin';
+  - pulsante per creare il plot;
+  - pulsante per fermare la creazione del plot;
+  - pulsante per avviare il mining;
+  - pulsante per fermare il mining;
+  - progress bar e label di stato che mostrano l'avanzamento delle operazioni.
+- Classe 'MinerService' con:
+  - 'createPlot(Path plotPath, long startNonce, String endpoint)':
+    - crea un file '.bin' sul disco del plot specificato; 
+    - contatta l'endpoint prima di generare il plot per ottenere informazioni di mining; 
     - scrive dati casuali nel file per simulare un vero plot; 
-    - simula l'invio del plot al nodo Mokamint indicato dall'endpoint; 
-    - restituisce un messaggio di stato da mostrare nella GUI.
+    - permette l'interruzione della creazione del plot ('stop plot'); 
+    - aggiorna lo stato della GUI in tempo reale.
+- Classe 'ReconnectingRemoteMiner': gestisce il mining usando il plot generato, con start/stop indipendenti dal plot. 
 
 ## Struttura del progetto
 
@@ -58,13 +59,13 @@ Attualmente il progetto permette di generare una chiave, creare un plot su disco
 ## Come eseguire il progetto
 
 1. Aprire il progetto con Intellij IDEA o Eclipse con supporto Maven.
-2. Assicurarsi di avere Java 17 installato
+2. Assicurarsi di avere Java 21 installato
 3. Eseguire 'Main.java' come applicazione JavaFX.
 
 ## Note
 
-- L'invio del plot al nodo Mokamint è solo simulato: non viene effettuata alcuna comunicazione di rete reale.
-- L'endpoint viene comunque richiesto e utilizzato per mantenere coerenza con l'architettura dell'app Android.
-- Il progetto è strutturato per permettere l'integrazione futura della comunicazione reale con il nodo Mokamint.
-- Maven è utilizzato per gestire le dipendenze e l'avvio di JavaFX. 
+- L'invio del plot al nodo Mokamint è solo simulato, ma l'endpoint viene comunque contattato per coerenza con l'app Android.
+- I bottoni vengono disabilitati durante la creazione del plot o l'esecuzione del mining per evitare conflitti.
+- Il progetto è pronto per future estensioni, come comunicazioni reali con il nodo Mokamint.
+- Maven gestisce le dipendeze e l'avvio di JavaFX. 
 

@@ -16,48 +16,87 @@
 
     <!-- TITOLO -->
     <Label text="Mokamint Desktop Miner"
-           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #212121;"
-           alignment="CENTER"/>
+           alignment="CENTER"
+           style="-fx-font-size: 24px;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #212121;"
+           maxWidth="Infinity"/>
 
     <!-- ENDPOINT -->
-    <HBox spacing="12">
-        <Label text="Endpoint:" style="-fx-font-size: 16px; -fx-text-fill: #212121;"/>
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Label text="Node endpoint:"
+               style="-fx-font-size: 16px;
+                      -fx-text-fill: #212121;"/>
         <TextField fx:id="endpointField"
-                   promptText="es: http://localhost:8033"
-                   style="-fx-font-size: 16px; -fx-pref-width: 300px;" />
+                   promptText="ws://localhost:8033"
+                   style="-fx-font-size: 16px;
+                          -fx-pref-width: 320px;" />
     </HBox>
 
-    <!-- PLOT SIZE -->
-    <HBox spacing="12">
-        <Label text="Plot size (MB):" style="-fx-font-size: 16px; -fx-text-fill: #212121;"/>
-        <TextField fx:id="plotSizeField"
-                   promptText="e.g. 1024"
-                   style="-fx-font-size: 16px; -fx-pref-width: 150px;" />
+    <!-- PLOT FILE -->
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Label text="Plot file"
+               style="-fx-font-size: 16px;
+                      -fx-text-fill: #212121;"/>
+        <TextField fx:id="plotFileField"
+                   promptText="plot.bin"
+                   style="-fx-font-size: 16px;
+                          -fx-pref-width: 320px;" />
     </HBox>
 
-    <!-- GENERATE KEY BUTTON -->
-    <Button text="Generate new key"
-            onAction="#onGenerateKey"
-            style="-fx-background-color: #03DAC5; -fx-text-fill: black; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px;"
-            maxWidth="Infinity" />
-
-    <!-- PLOT KEY -->
-    <HBox spacing="8" >
-        <Label text="Plot key:" style="-fx-font-size: 16px; -fx-text-fill: #212121;"/>
-        <TextField fx:id="plotKeyField"
-                   promptText="plot key"
-                   style="-fx-font-size: 16px; -fx-pref-width: 300px;"/>
-    </HBox>
-
-    <!-- CREATE PLOT -->
-    <Button text="Create plot"
+    <!-- CREATE PLOT BUTTON -->
+    <Button fx:id="createPlotButton"
+            text="Create plot"
             onAction="#onCreatePlot"
-            style="-fx-background-color: #6200EE; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8px;"
-            maxWidth="Infinity"/>
+            maxWidth="Infinity"
+            style="-fx-background-color: #6200EE;
+                   -fx-text-fill: white;
+                   -fx-font-size: 16px;
+                   -fx-font-weight: bold;
+                   -fx-background-radius: 8px;" />
+
+    <!-- STOP PLOT BUTTON -->
+    <Button fx:id="stopPlotButton"
+            text="Stop plot"
+            onAction="#onStopPlot"
+            maxWidth="Infinity"
+            style="-fx-background-color: #B00020;
+                   -fx-text-fill: white;
+                   -fx-font-size: 14px;
+                   -fx-font-weight: bold;
+                   -fx-background-radius: 8px;" />
+
+    <!-- PROGRESS BAR -->
+    <ProgressBar fx:id="progressBar"
+                 progress="0"
+                 maxWidth="Infinity"
+                 style="-fx-accent: #6200EE;" />
+
+    <!-- START / STOP MINING BUTTON -->
+    <HBox spacing="12" alignment="CENTER" >
+        <Button fx:id="startMiningButton"
+                text="Start mining"
+                onAction="#onStartMining"
+                style="-fx-background-color: #03DAC5;
+                       -fx-text-fill: black;
+                       -fx-font-size: 14px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 8px;" />
+
+        <Button fx:id="stopMiningButton"
+                text="Stop mining"
+                onAction="#onStopMining"
+                style="-fx-background-color: #B00020;
+                       -fx-text-fill: white;
+                       -fx-font-size: 14px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 8px;" />
+    </HBox>
 
     <!-- STATUS -->
     <Label fx:id="statusLabel"
            text="Status: waiting..."
-           style="-fx-font-size: 14px; -fx-text-fill: #616161;"
-           wrapText="true" />
+           wrapText="true"
+           style="-fx-font-size: 14px;
+                  -fx-text-fill: #616161;"/>
 </VBox>

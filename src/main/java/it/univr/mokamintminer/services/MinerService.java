@@ -1,84 +1,71 @@
 package it.univr.mokamintminer.services;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.Base64;
+import io.hotmoka.crypto.HashingAlgorithms;
+import io.hotmoka.crypto.SignatureAlgorithms;
+import io.hotmoka.crypto.api.HashingAlgorithm;
+import io.hotmoka.crypto.api.SignatureAlgorithm;
+import io.mokamint.nonce.Prologs;
+import io.mokamint.nonce.api.Prolog;
+import io.mokamint.plotter.Plots;
 
-import it.univr.mokamintminer.core.ReconnectingRemoteMiner;
+import java.nio.file.Path;
+import java.security.KeyPair;
 
 public class MinerService {
 
-    private final SecureRandom random = new SecureRandom();
-
-    /**
-     * Genera una nuova chiave casuale codificata in Base64
-     */
-    public String generateNewKeyPair() {
-        byte[] bytes = new byte[32];
-        random.nextBytes(bytes);
-        return Base64.getEncoder().encodeToString(bytes);
+    public interface ProgressListener {
+        void onProgress(int percent);
     }
 
-    /**
-     * Crea un file "plot" sul disco della dimensione specificata (in MB) utilizzando la chiave fornita
-     *
-     * @param plotSizeMB dimensione del plot in MB
-     * @param key chiave del plot
-     */
-    public String createPlot(long plotSizeMB, String key, String endpoint) {
-        System.out.println("Creating plot..." );
-        System.out.println("Plot size (MB): " + plotSizeMB);
-        System.out.println("Plot Key: " + key);
+    // TEST MODE
+    // Plot piccolo per sviluppo, numero di nonce (poco per test: ca 1.25MB)
+    private static final long TEST_PLOT_SIZE = 5;
 
-        // File plot simulato
-        String safeKey = key.replace("/", "_");
-        String fileName = "plot_" + key.substring(0, Math.min(8, key.length())) + ".bin";
-        File plotFile = new File(fileName);
+    public void createPlot(Path plotPath,
+                           long startNonce,
+                           String endpoint,
+                           ProgressListener listener
+    ) throws Exception {
 
-        // Numero di byte totali da scrivere
-        long totalBytes = plotSizeMB * 1024 * 1024;
+            // Algoritmi crypto
+            SignatureAlgorithm signature = SignatureAlgorithms.ed25519();
+            HashingAlgorithm hashing = HashingAlgorithms.sha256();
 
-        try (FileOutputStream fos = new FileOutputStream(plotFile)) {
-            byte[] buffer = new byte[1024 * 1024]; // buffer da 1MB
-            long bytesWritten = 0;
+            // Chiavi locali del miner
+            KeyPair blockKeys = signature.getKeyPair();
+            KeyPair txKeys = signature.getKeyPair();
 
-            while (bytesWritten < totalBytes) {
-                int bytesToWrite = (int) Math.min(buffer.length, totalBytes - bytesWritten);
-                random.nextBytes(buffer);
-                fos.write(buffer, 0, bytesToWrite);
-                bytesWritten += bytesToWrite;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Error while creating plot";
-        }
+            // prolog valido
+            Prolog prolog = Prologs.of(
+                    "desktop-miner",
+                    signature,
+                    blockKeys.getPublic(),
+                    signature,
+                    txKeys.getPublic(),
+                    new byte[0]
+            );
 
-        System.out.println("Plot created at " + plotFile.getAbsolutePath());
+            // dimensione plot documentata
+            long plotSize = TEST_PLOT_SIZE;
 
-        // Simulazione
-        System.out.println("Sending plot to node " + endpoint + "...");
-        simulateSend(plotFile, endpoint);
-        System.out.println("Plot successfully sent");
+            System.out.println("[PLOT] Creating plot:");
+            System.out.println("[PLOT] Path: " + plotPath.toAbsolutePath());
+            System.out.println("[PLOT] Nonces: " + plotSize);
+            System.out.println("[PLOT] Estimated size: " + (plotSize * 262144 / (1024 * 1024)) + " MB");
 
-        // Start miner
-        ReconnectingRemoteMiner miner = new ReconnectingRemoteMiner(endpoint, plotFile);
+            // creazione plot
+            Plots.create(
+                    plotPath,
+                    prolog,
+                    startNonce,
+                    plotSize,
+                    hashing,
+                    progress -> {
+                        if (listener != null)
+                            listener.onProgress(progress);
+                    }
+            );
 
-        Thread minerThread = new Thread(miner);
-        minerThread.setDaemon(true);
-        minerThread.start();
-
-        System.out.println("Remote miner started");
-
-        return "Plot created and mining started";
     }
 
-    private void simulateSend(File plotFile, String endpoint) {
-        // simulazione: nessuna rete reale
-        try {
-            Thread.sleep(500); // solo per simulare un'attesa
-        } catch (InterruptedException ignored) {
-        }
-    }
 }
