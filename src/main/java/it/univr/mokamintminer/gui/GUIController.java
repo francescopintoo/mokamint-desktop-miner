@@ -43,7 +43,6 @@ public class GUIController {
     // PLOT
     private Task<Void> plotTask;
     private Thread plotThread;
-    private volatile boolean plotCancelled = false;
 
     // MINING
     private Thread miningThread;
@@ -67,9 +66,8 @@ public class GUIController {
         }
 
         Path plotPath = Path.of(plotFile);
-        plotCancelled = false;
 
-        disablePlotControls(true);
+        setPlotMode(true);
 
         plotTask = new Task<>() {
             @Override
@@ -103,23 +101,17 @@ public class GUIController {
         plotTask.setOnSucceeded(e -> {
             cleanupPlotBindings();
 
-            if (plotCancelled) {
-                statusLabel.setText("Plot creation cancelled");
-                progressBar.setProgress(0);
-            } else {
-                statusLabel.setText("Plot created successfully");
-                progressBar.setProgress(1.0);
-            }
-
-            disablePlotControls(false);
+            statusLabel.setText("Plot created successfully");
+            progressBar.setProgress(1.0);
+            setPlotMode(false);
             plotTask = null;
         });
 
         plotTask.setOnCancelled(e -> {
             cleanupPlotBindings();
-            statusLabel.setText("Plot creation cancelled (finishing in background)");
+            statusLabel.setText("Plot creation stopped");
             progressBar.setProgress(0);
-            disablePlotControls(false);
+            setPlotMode(false);
             plotTask = null;
         });
 
@@ -127,7 +119,7 @@ public class GUIController {
             cleanupPlotBindings();
             statusLabel.setText("Error: " + plotTask.getException().getMessage());
             progressBar.setProgress(0);
-            disablePlotControls(false);
+            setPlotMode(false);
             plotTask = null;
         });
 
@@ -140,11 +132,7 @@ public class GUIController {
     @FXML
     private void onStopPlot() {
         if (plotTask != null && plotTask.isRunning()) {
-            plotCancelled = true;
             plotTask.cancel();
-            statusLabel.setText("Status: stopping plot...");
-        } else {
-            statusLabel.setText("Status: no plot running");
         }
     }
 
@@ -152,8 +140,11 @@ public class GUIController {
     @FXML
     private void onStartMining() {
 
+        if (plotTask != null && plotTask.isRunning()) {
+            return;  // Mining disabilitato durante il plot
+        }
+
         if (miningThread != null && miningThread.isAlive()) {
-            statusLabel.setText("Status: mining already running");
             return;
         }
 
@@ -168,17 +159,23 @@ public class GUIController {
         miner = new ReconnectingRemoteMiner(endpoint, new File(plotFile));
 
         miningThread = new Thread(() -> {
-            javafx.application.Platform.runLater(() -> statusLabel.setText("Status: mining started"));
             miner.run();
         }, "mining-thread");
 
         miningThread.setDaemon(true);
         miningThread.start();
+
+        statusLabel.setText("Status: mining started");
     }
 
     // STOP MINING
     @FXML
     private void onStopMining() {
+
+        // Se il plot è attivo, non fa nulla
+        if (plotTask != null && plotTask.isRunning()) {
+            return;
+        }
 
         if (miner != null) {
             miner.stop();
@@ -194,15 +191,20 @@ public class GUIController {
     }
 
     // HELPERS
-    private void disablePlotControls(boolean plotting) {
+    private void setPlotMode(boolean plotting) {
         createPlotButton.setDisable(plotting);
         stopPlotButton.setDisable(!plotting);
         startMiningButton.setDisable(plotting);
+        stopMiningButton.setDisable(plotting);
     }
 
     private void cleanupPlotBindings() {
-        statusLabel.textProperty().unbind();
-        progressBar.progressProperty().unbind();
+
+        if (statusLabel.textProperty().isBound())
+            statusLabel.textProperty().unbind();
+
+        if (progressBar.progressProperty().isBound())
+            progressBar.progressProperty().unbind();
     }
 }
 

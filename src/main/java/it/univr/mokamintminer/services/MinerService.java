@@ -19,7 +19,7 @@ public class MinerService {
 
     // TEST MODE
     // Plot piccolo per sviluppo, numero di nonce (poco per test: ca 1.25MB)
-    private static final long TEST_PLOT_SIZE = 5;
+    private static final long TEST_PLOT_SIZE = 1000;
 
     public void createPlot(Path plotPath,
                            long startNonce,
