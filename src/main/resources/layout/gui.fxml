@@ -35,13 +35,27 @@
 
     <!-- PLOT FILE -->
     <HBox spacing="12" alignment="CENTER_LEFT">
-        <Label text="Plot file"
+        <Label text="Plot file:"
                style="-fx-font-size: 16px;
                       -fx-text-fill: #212121;"/>
         <TextField fx:id="plotFileField"
                    promptText="plot.bin"
                    style="-fx-font-size: 16px;
                           -fx-pref-width: 320px;" />
+    </HBox>
+
+    <!-- PLOT SIZE -->
+    <HBox spacing = "12" alignment="CENTER_LEFT">
+        <Label text="Plot size (nonces):"
+               style="-fx-font-size: 16px;
+                      -fx-text-fill: #212121;" />
+        <TextField fx:id="plotSizeField"
+                   promptText="default: 1000"
+                   style="-fx-font-size: 16px;
+                          -fx-pref-width: 160px;"/>
+        <Label text="≈ 250MB at 1000 nonces"
+               style="-fx-font-size: 13px;
+                      -fx-text-fill: #9E9E9E;"/>
     </HBox>
 
     <!-- CREATE PLOT BUTTON -->
@@ -93,6 +107,7 @@
                        -fx-background-radius: 8px;" />
     </HBox>
 
+    <!-- LOG AREA -->
     <TextArea fx:id="logArea" editable="false" prefHeight="150" />
 
     <!-- STATUS -->
@@ -101,4 +116,13 @@
            wrapText="true"
            style="-fx-font-size: 14px;
                   -fx-text-fill: #616161;"/>
+
+    <!-- DEADLINES COUNTER -->
+    <Label fx:id="deadlinesLabel"
+           text="Deadlines computed: 0"
+           wrapText="true"
+           style="-fx-font-size: 14px;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #6200EE;"/>
+
 </VBox>

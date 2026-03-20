@@ -17,12 +17,12 @@ public class MinerService {
         void onProgress(int percent);
     }
 
-    // TEST MODE
-    // Plot piccolo per sviluppo, numero di nonce (poco per test: ca 1.25MB)
-    private static final long TEST_PLOT_SIZE = 1000;
+    // Valore di default se l'utente non specifica nulla
+    public static final long DEFAULT_PLOT_SIZE = 1000;
 
     public void createPlot(Path plotPath,
                            long startNonce,
+                           long plotSize,
                            String endpoint,
                            ProgressListener listener
     ) throws Exception {
@@ -45,11 +45,9 @@ public class MinerService {
                     new byte[0]
             );
 
-            // dimensione plot documentata
-            long plotSize = TEST_PLOT_SIZE;
-
             System.out.println("[PLOT] Creating plot:");
             System.out.println("[PLOT] Path: " + plotPath.toAbsolutePath());
+
             System.out.println("[PLOT] Nonces: " + plotSize);
             System.out.println("[PLOT] Estimated size: " + (plotSize * 262144 / (1024 * 1024)) + " MB");
 

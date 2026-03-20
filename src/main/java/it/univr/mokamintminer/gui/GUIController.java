@@ -2,6 +2,7 @@ package it.univr.mokamintminer.gui;
 
 import it.univr.mokamintminer.core.DesktopMinerService;
 import it.univr.mokamintminer.services.MinerService;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -11,6 +12,7 @@ import javafx.scene.control.TextField;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GUIController {
 
@@ -21,7 +23,13 @@ public class GUIController {
     private TextField plotFileField;
 
     @FXML
+    private TextField plotSizeField;
+
+    @FXML
     private Label statusLabel;
+
+    @FXML
+    private Label deadlinesLabel;
 
     @FXML
     private ProgressBar progressBar;
@@ -48,8 +56,10 @@ public class GUIController {
     private Thread plotThread;
 
     // MINING
-    private Thread miningThread;
     private DesktopMinerService miner;
+
+    private final java.util.concurrent.atomic.AtomicBoolean simulationActive = new AtomicBoolean(false);
+
 
     // CREATE PLOT
     @FXML
@@ -67,26 +77,37 @@ public class GUIController {
             return;
         }
 
-        Path plotPath = Path.of(plotFile);
+        // Legge la plot size dal campo, con fallback al valore di default
+        long plotSize;
+        try {
+            String sizeText = plotSizeField.getText().trim();
+            plotSize = sizeText.isEmpty() ? MinerService.DEFAULT_PLOT_SIZE : Long.parseLong(sizeText);
+            if (plotSize <= 0)
+                throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            statusLabel.setText("Status invalid plot size (must be a positive number)");
+            return;
+        }
 
+        Path plotPath = Path.of(plotFile);
+        final long finalPlotSize = plotSize;
         setPlotMode(true);
 
         plotTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-
-                log(" Creating plot...");
+                log(" Creating plot (" + finalPlotSize + " nonces, ~" + (finalPlotSize * 262144 / (1024 * 1024))
+                        + " MB)...");
                 updateMessage("Status: Creating plot...");
 
                 minerService.createPlot(
                         plotPath,
                         0L,
+                        finalPlotSize,
                         endpoint,
                         progress -> {
-
-                            if (isCancelled()) {
+                            if (isCancelled())
                                 return;
-                            }
 
                             updateProgress(progress, 100);
                             updateMessage("Progress: " + progress + "%");
@@ -143,11 +164,11 @@ public class GUIController {
     // START MINING
     @FXML
     private void onStartMining() {
-        if (plotTask != null && plotTask.isRunning()) {
+        if (plotTask != null && plotTask.isRunning())
             return;  // Mining disabilitato durante il plot
-        }
 
-        if (miningThread != null && miningThread.isAlive()) {
+        if (miner != null) {
+            statusLabel.setText("Status: mining already running");
             return;
         }
 
@@ -166,6 +187,9 @@ public class GUIController {
             return;
         }
 
+        // Reset contatore deadlines ad ogni nuova sessione di mining
+        updateDeadlinesLabel(0);
+
         try {
             miner = new DesktopMinerService(
                     endpointUri,
@@ -173,31 +197,35 @@ public class GUIController {
                     new DesktopMinerService.MinerListener() {
                         @Override
                         public void onConnected() {
-                            log("Connect to node");
-                            statusLabel.setText("Status: Connected");
+                            simulationActive.set(false);
+                            Platform.runLater(() -> {
+                                log("Connect to node");
+                                statusLabel.setText("Status: Connected");
+                            });
                         }
 
                         @Override
                         public void onDisconnected() {
-                            log(" Disconnected from node");
-                            statusLabel.setText("Status: Disconnected");
+                            Platform.runLater(() -> {
+                                log(" Disconnected from node");
+                                statusLabel.setText("Status: Disconnected");
+                            });
                         }
 
                         @Override
-                        public void onDeadline() {
-                            log(" Deadline computed");
-                            statusLabel.setText("Status: Mining...");
+                        public void onDeadline(int totalDeadlines) {
+                            Platform.runLater(() -> {
+                                log(" Deadline computed (total: " + totalDeadlines + ")");
+                                statusLabel.setText("Status: Mining...");
+                                updateDeadlinesLabel(totalDeadlines);
+                            });
                         }
                     }
             );
 
-            miningThread = new Thread(() -> miner.isConnected(), "mining-thread");
-            miningThread.setDaemon(true);
-            miningThread.start();
-
             log(" Starting mining...");
-            startSimulationIfNoConnection();
             statusLabel.setText("Status: Mining started");
+            startSimulationIfNoConnection();
 
         } catch (Exception e) {
             statusLabel.setText("Error: " + e.getMessage());
@@ -208,18 +236,15 @@ public class GUIController {
     @FXML
     private void onStopMining() {
         // Se il plot è attivo, non fa nulla
-        if (plotTask != null && plotTask.isRunning()) {
+        if (plotTask != null && plotTask.isRunning())
             return;
-        }
+
+        // ferma anche la simulazione se attiva
+        simulationActive.set(false);
 
         if (miner != null) {
             miner.close();
             miner = null;
-        }
-
-        if (miningThread != null) {
-            miningThread.interrupt();
-            miningThread = null;
         }
 
         log(" Mining stopped");
@@ -227,6 +252,10 @@ public class GUIController {
     }
 
     // HELPERS
+    private void updateDeadlinesLabel(int count) {
+        deadlinesLabel.setText("Deadlines computed: " + count);
+    }
+
     private void setPlotMode(boolean plotting) {
         createPlotButton.setDisable(plotting);
         stopPlotButton.setDisable(!plotting);
@@ -245,34 +274,45 @@ public class GUIController {
     private void log(String message) {
         String time = java.time.LocalDateTime.now().withNano(0).toString();
 
-        javafx.application.Platform.runLater(() -> {
+        Platform.runLater(() -> {
             logArea.appendText("[" + time + "]" + message + "\n");
             logArea.setScrollTop(Double.MAX_VALUE);
         });
     }
 
     private void startSimulationIfNoConnection() {
+        // Attiva il flag prima di partire
+        simulationActive.set(true);
+
         new Thread(() -> {
             try {
                 Thread.sleep(3000);
+                // Se onConnected() reale è già arrivato, non simulo
+                if (!simulationActive.get())
+                    return;
 
-                // Simulo solo se non è arrivata una connessione reale
-                if (miner != null) {
-                    log(" Simulated: Connected");
-                    statusLabel.setText("Status: Connected");
+                log(" Simulated: Connected");
+                Platform.runLater(() -> statusLabel.setText("Status: Connected (simulated)"));
 
-                    for (int i=0; i<5; i++) {
-                        Thread.sleep(1500);
-                        log(" Simulated: Deadline computed");
-                    }
+                for (int i=0; i<5; i++) {
+                    Thread.sleep(1500);
+                    if (!simulationActive.get())
+                        return;
+                    final int count = i;
 
-                    Thread.sleep(1000);
-                    log(" Simulated: Disconnected");
-                    statusLabel.setText("Status: Disconnected");
+                    log(" Simulated: Deadline computed");
+                    Platform.runLater(() -> updateDeadlinesLabel(count));
                 }
 
+                Thread.sleep(1000);
+                if (!simulationActive.get())
+                    return;
+
+                log(" Simulated: Disconnected");
+                Platform.runLater(() -> statusLabel.setText("Status: Disconnected (simulated)"));
+
             } catch (InterruptedException ignored) {}
-        }).start();
+        }, "simulation-thread").start();
     }
 
 }

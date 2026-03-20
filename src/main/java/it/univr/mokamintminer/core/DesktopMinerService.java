@@ -8,16 +8,17 @@ import io.mokamint.plotter.Plots;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DesktopMinerService extends AbstractReconnectingMinerService {
 
     private final MinerListener listener;
-    private int deadlines = 0;
+    private final AtomicInteger deadlines = new AtomicInteger(0);
 
     public interface MinerListener {
         void onConnected();
         void onDisconnected();
-        void onDeadline();
+        void onDeadline(int totalDeadlines);
     }
 
     public DesktopMinerService(URI endpoint, Path plotPath, MinerListener listener) throws Exception {
@@ -57,11 +58,18 @@ public class DesktopMinerService extends AbstractReconnectingMinerService {
     @Override
     protected void onDeadlineComputed(Deadline deadline) {
         super.onDeadlineComputed(deadline);
+        int total = deadlines.incrementAndGet();
 
         if (listener != null)
-            listener.onDeadline();
+            listener.onDeadline(total);
+    }
 
-        deadlines++;
+    public int getDeadlines() {
+        return deadlines.get();
+    }
+
+    public void resetDeadlines() {
+        deadlines.set(0);
     }
 
 }
