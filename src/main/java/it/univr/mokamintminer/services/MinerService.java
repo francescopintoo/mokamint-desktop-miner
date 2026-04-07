@@ -29,7 +29,7 @@ public class MinerService {
 
             // Algoritmi crypto
             SignatureAlgorithm signature = SignatureAlgorithms.ed25519();
-            HashingAlgorithm hashing = HashingAlgorithms.sha256();
+            HashingAlgorithm hashing = HashingAlgorithms.shabal256();
 
             // Chiavi locali del miner
             KeyPair blockKeys = signature.getKeyPair();
